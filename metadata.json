@@ -1,0 +1,6 @@
+{
+  "name": "JTG Panel",
+  "description": "A web-based server management panel with Minecraft, Discord bot, and website hosting, file manager, and terminal access.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

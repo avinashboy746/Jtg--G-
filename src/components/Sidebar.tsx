@@ -1,0 +1,86 @@
+import { Link, useLocation } from "react-router-dom";
+import { Server, LayoutDashboard, Plus, LogOut, X, Settings } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useSettings } from "../context/SettingsContext";
+import { motion } from "framer-motion";
+
+export function Sidebar({ onClose }: { onClose?: () => void }) {
+  const location = useLocation();
+  const { user, logout } = useAuth();
+  const { panelName } = useSettings();
+  
+  const links = [
+    { name: "Dashboard", path: "/", icon: <LayoutDashboard size={18} /> },
+    { name: "Servers", path: "/servers", icon: <Server size={18} /> },
+  ];
+
+  if (user?.role === "admin") {
+    links.push({ name: "Create Server", path: "/servers/create", icon: <Plus size={18} /> });
+  }
+
+  links.push({ name: "Settings", path: "/settings", icon: <Settings size={18} /> });
+
+  return (
+    <div className="w-64 h-full bg-[#0a0a0c] flex flex-col py-6 border-r border-white/5 relative shadow-2xl z-20">
+      {onClose && (
+        <button onClick={onClose} className="md:hidden flex items-center justify-center absolute top-5 right-4 p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+          <X size={20} />
+        </button>
+      )}
+      
+      <div className="px-6 mb-10 mt-2 flex items-center gap-3">
+        <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-[0_0_15px_rgba(99,102,241,0.5)] flex-shrink-0">
+          <Server className="w-4 h-4 text-white" />
+        </div>
+        <h1 className="text-xl font-bold text-white tracking-tight truncate">
+          {panelName}
+        </h1>
+      </div>
+
+      <nav className="flex-1 w-full px-3 space-y-1">
+        {links.map(link => {
+          const isActive = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
+          return (
+            <Link 
+              key={link.path} 
+              to={link.path} 
+              onClick={onClose}
+              className="relative flex items-center space-x-3 w-full px-3 py-2.5 rounded-xl transition-all group overflow-hidden"
+            >
+              {isActive && (
+                <motion.div 
+                  layoutId="activeTab" 
+                  className="absolute inset-0 bg-white/10 rounded-xl" 
+                  initial={false} 
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+              <div className={`relative z-10 transition-colors duration-200 ${isActive ? 'text-indigo-400' : 'text-zinc-400 group-hover:text-indigo-300'}`}>
+                {link.icon}
+              </div>
+              <span className={`relative z-10 font-medium text-sm transition-colors duration-200 ${isActive ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'}`}>
+                {link.name}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="w-full px-4 mt-auto space-y-3">
+        <div className="bg-white/[0.03] rounded-xl p-3 flex items-center gap-3 border border-white/5 hover:bg-white/[0.05] transition-colors cursor-default">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-sm text-indigo-300">
+            {user?.username?.[0]?.toUpperCase()}
+          </div>
+          <div className="overflow-hidden flex-1">
+            <p className="font-medium text-zinc-200 truncate text-sm">{user?.username}</p>
+            <p className="text-xs text-zinc-500 capitalize truncate font-mono tracking-wide">{user?.role || "Admin"}</p>
+          </div>
+        </div>
+        <button onClick={logout} className="flex items-center space-x-3 w-full px-3 py-2.5 rounded-xl text-zinc-400 hover:bg-red-500/10 hover:text-red-400 transition-all group">
+          <LogOut size={18} className="group-hover:scale-110 transition-transform" />
+          <span className="font-medium text-sm">Logout</span>
+        </button>
+      </div>
+    </div>
+  );
+}
